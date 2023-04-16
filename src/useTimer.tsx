@@ -1,6 +1,6 @@
-import { useState, useRef } from 'react';
+import { useState, useRef, MutableRefObject } from "react";
 
-// Define the type of object that will be returned from the hook
+// Define the properties and methods returned by the hook
 interface TimerState {
   timer: number;
   handleStartTimer: () => void;
@@ -9,71 +9,77 @@ interface TimerState {
   handleResetTimer: () => void;
 }
 
-type CurrentRef = {
-  current: string | number | undefined
-} | null
-
-// The hook that manages the timer state and related logic
+/**
+ * React counter hook to manage a timer
+ * @param reverse for reverse mode, the timer will count down from the end value to the start value
+ * @param startFrom the timer will start from this value
+ * @param endAt the timer will stop at this value
+ * @param intervalDuration it is the duration of each interval in milliseconds
+ * @returns the timer state
+ */
+// Define the hook function with optional parameters and default values
 const useTimer = (
-  reverse: boolean = false,
-  startFrom: number = 0,
-  endAt: number = 0
+  reverse = false,
+  startFrom = 0,
+  endAt = 0,
+  intervalDuration = 1000 // The duration of each interval in milliseconds
 ): TimerState => {
-  // Create a ref to store the ID of the interval
-  const countRef = useRef<string | number | NodeJS.Timeout | undefined>(null);
-  // Create a state to store the current timer value
-  const [timer, setTimer] = useState(startFrom);
+  const countRef = useRef<NodeJS.Timeout | undefined>(); // Reference to the interval ID
+  const [timer, setTimer] = useState(startFrom); // The timer value
 
-  // checks logic of "startFrom", "endAt" and "reverse"
+  // Check if the start and end values are valid for the chosen mode (reverse/forward)
   const startEndChecker = () => {
-    if (reverse) {
+    if ((reverse && startFrom < endAt) || (!reverse && startFrom > endAt)) {
       console.error(
-        `When reverse is "True", "startFrom" number should be more than "endAt"!`
+        `React-counter-hook: Invalid start/end values for ${
+          reverse ? "reverse" : "forward"
+        } mode`
       );
-      return startFrom < endAt;
-    } else {
-      console.error(
-        `When reverse is "False", "startFrom" number should be less than "endAt"!`
-      );
-      return startFrom > endAt;
+      return true; // Return true if the values are invalid
     }
+    return false; // Return false if the values are valid
   };
 
   // Function to start the timer
   const handleStartTimer = () => {
-    clearInterval(countRef.current!);
-    (countRef.current as NodeJS.Timeout) = setInterval(() => {
+    clearInterval(countRef.current); // Clear any previous intervals
+    countRef.current = setInterval(() => {
       if (startEndChecker() || timer === endAt) {
-        clearInterval(countRef.current as number);
-        return;
+        // If the start/end values are invalid or the end value is reached, stop the timer
+        clearInterval(countRef.current);
+      } else {
+        // Otherwise, update the timer value based on the chosen mode
+        setTimer((prevTimer) => (reverse ? prevTimer - 1 : prevTimer + 1));
       }
-      setTimer((prevTimer) => (reverse ? prevTimer - 1 : prevTimer + 1));
-    }, 1000);
+    }, intervalDuration); // Set the interval duration
   };
 
   // Function to pause the timer
   const handlePauseTimer = () => {
-    clearInterval(countRef.current as number);
+    clearInterval(countRef.current); // Clear the current interval
   };
 
   // Function to resume the timer
   const handleResumeTimer = () => {
-    (countRef.current as NodeJS.Timeout) = setInterval(() => {
+    // Set a new interval to update the timer value
+    countRef.current = setInterval(() => {
       if (startEndChecker() || timer === endAt) {
-        clearInterval(countRef.current as number);
-        return;
+        // If the start/end values are invalid or the end value is reached, stop the timer
+        clearInterval(countRef.current);
+      } else {
+        // Otherwise, update the timer value based on the chosen mode
+        setTimer((prevTimer) => (reverse ? prevTimer - 1 : prevTimer + 1));
       }
-      setTimer((prevTimer) => (reverse ? prevTimer - 1 : prevTimer + 1));
-    }, 1000);
+    }, intervalDuration); // Set the interval duration
   };
 
-  // Function to reset the timer
+  // Function to reset the timer to its initial value
   const handleResetTimer = () => {
-    clearInterval(countRef.current as number);
-    setTimer(startFrom);
+    clearInterval(countRef.current); // Clear the current interval
+    setTimer(startFrom); // Reset the timer value to the starting value
   };
 
-  // Return the timer state and related functions
+  // Return the timer state object with all its properties and methods
   return {
     timer,
     handleStartTimer,
@@ -83,4 +89,4 @@ const useTimer = (
   };
 };
 
-export default useTimer;
+export default useTimer; // Export the hook function as the default export

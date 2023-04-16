@@ -3,7 +3,7 @@ import useTimer from './useTimer';
 
 export default function App() {
   const { timer, handleStartTimer, handlePauseTimer, handleResetTimer } =
-    useTimer(false, 5, 10);
+    useTimer(true, 300, 200);
 
   React.useEffect(() => {
     handleStartTimer();
