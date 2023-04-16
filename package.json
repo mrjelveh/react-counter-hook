@@ -2,6 +2,9 @@
   "name": "react-counter-hook",
   "version": "0.0.0",
   "private": true,
+  "author": "MohammadReza Jelveh",
+  "description": "This is a custom hook for managing a timer in a React application. The useTimer hook allows you to define the mode of the counter (forward or reverse), the starting value, the end value, and the interval duration.",
+  "license": "MIT",
   "dependencies": {
     "@types/react": "^18.0.8",
     "@types/react-dom": "^18.0.2",
@@ -15,6 +18,11 @@
     "test": "react-scripts test --env=jsdom",
     "eject": "react-scripts eject"
   },
+  "keywords": [
+    "react-counter",
+    "react-timer",
+    "reverse-timer"
+  ],
   "devDependencies": {
     "react-scripts": "latest"
   },
